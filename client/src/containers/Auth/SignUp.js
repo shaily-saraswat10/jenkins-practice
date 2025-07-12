@@ -1,23 +1,25 @@
-import React from 'react';
-import Alert from '@material-ui/lab/Alert';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
-import Link from '@material-ui/core/Link';
-import Snackbar from '@material-ui/core/Snackbar';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
-import { Field, reduxForm, SubmissionError } from 'redux-form';
+import React, { useEffect } from 'react';
+
+import Alert from '@mui/material/Alert';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Snackbar from '@mui/material/Snackbar';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { Field, reduxForm, SubmissionError } from 'redux-form';
+import { makeStyles } from 'tss-react/mui';
+
 import { signUp, unloadAuthPage } from '../../store/actions';
-import { getProcessing, getError } from '../../store/selectors';
+import { getError, getProcessing } from '../../store/selectors';
 import { email, minLength, required } from '../../utils/formValidator';
 
-const styles = (theme) => ({
+const useStyles = makeStyles()((theme) => ({
   paper: {
     display: 'flex',
     flexDirection: 'column',
@@ -36,23 +38,42 @@ const styles = (theme) => ({
   submit: {
     margin: theme.spacing(4, 0, 2),
   },
-});
+}));
 
-class SignUp extends React.Component {
-  onSubmit = (formValues) => {
-    return this.props.signUp(formValues).then(() => {
-      if (this.props.errorMessage) {
-        throw new SubmissionError({ _error: this.props.errorMessage });
+const SignUp = ({
+  signUp,
+  errorMessage,
+  history,
+  unloadAuthPage,
+  handleSubmit,
+  pristine,
+  submitting,
+  valid,
+  error,
+}) => {
+  const { classes } = useStyles();
+  useEffect(() => {
+    return () => {
+      unloadAuthPage();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSubmit = (formValues) => {
+    return signUp(formValues).then(() => {
+      if (errorMessage) {
+        throw new SubmissionError({ _error: errorMessage });
       }
-      this.props.history.push('/signin');
+      history.push('/signin');
     });
   };
 
-  componentWillUnmount() {
-    this.props.unloadAuthPage();
-  }
-
-  renderTextField = ({ input, label, meta: { touched, error }, ...custom }) => (
+  const renderTextField = ({
+    input,
+    label,
+    meta: { touched, error },
+    ...custom
+  }) => (
     <TextField
       label={label}
       error={touched && !!error}
@@ -67,99 +88,99 @@ class SignUp extends React.Component {
     />
   );
 
-  render() {
-    const {
-      classes,
-      handleSubmit,
-      pristine,
-      submitting,
-      valid,
-      error,
-    } = this.props;
-    return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar
-            className={classes.avatar}
-            alt="Logo"
-            src="/logo-circle512.png"
-          />
-          <Typography component="h1" variant="h5" color="primary">
-            Sign Up
-          </Typography>
-          <form className={classes.form} onSubmit={handleSubmit(this.onSubmit)}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Field
-                  id="username"
-                  label="Username"
-                  name="username"
-                  component={this.renderTextField}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Field
-                  autoComplete="fname"
-                  id="firstName"
-                  label="First Name"
-                  name="firstName"
-                  component={this.renderTextField}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Field
-                  autoComplete="lname"
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  component={this.renderTextField}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Field
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  component={this.renderTextField}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Field
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  component={this.renderTextField}
-                />
-              </Grid>
+  return (
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar
+          className={classes.avatar}
+          alt="Logo"
+          src="/logo-circle512.png"
+        />
+        <Typography component="h1" variant="h5" color="primary">
+          Sign Up
+        </Typography>
+        <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3}>
+            <Grid size={12}>
+              <Field
+                id="username"
+                label="Username"
+                name="username"
+                component={renderTextField}
+              />
             </Grid>
-            <Button
-              className={classes.submit}
-              color="primary"
-              disabled={pristine || submitting || !valid}
-              fullWidth
-              type="submit"
-              variant="contained"
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+              }}
             >
-              Submit
-            </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link href="/signin" variant="body2">
-                  {'Already have an account? Sign in'}
-                </Link>
-              </Grid>
+              <Field
+                autoComplete="fname"
+                id="firstName"
+                label="First Name"
+                name="firstName"
+                component={renderTextField}
+              />
             </Grid>
-          </form>
-        </div>
-        <Snackbar open={!!error}>
-          <Alert severity="error">{error}</Alert>
-        </Snackbar>
-      </Container>
-    );
-  }
-}
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6,
+              }}
+            >
+              <Field
+                autoComplete="lname"
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                component={renderTextField}
+              />
+            </Grid>
+            <Grid size={12}>
+              <Field
+                id="email"
+                label="Email Address"
+                name="email"
+                component={renderTextField}
+              />
+            </Grid>
+            <Grid size={12}>
+              <Field
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                component={renderTextField}
+              />
+            </Grid>
+          </Grid>
+          <Button
+            className={classes.submit}
+            color="primary"
+            disabled={pristine || submitting || !valid}
+            fullWidth
+            type="submit"
+            variant="contained"
+          >
+            Submit
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid>
+              <Link href="/signin" variant="body2">
+                {'Already have an account? Sign in'}
+              </Link>
+            </Grid>
+          </Grid>
+        </form>
+      </div>
+      <Snackbar open={!!error}>
+        <Alert severity="error">{error}</Alert>
+      </Snackbar>
+    </Container>
+  );
+};
 
 const maptStateToProps = (state) => {
   return {
@@ -180,6 +201,5 @@ const validate = (values) => {
 
 export default compose(
   connect(maptStateToProps, { signUp, unloadAuthPage }),
-  reduxForm({ form: 'signUp', validate }),
-  withStyles(styles)
+  reduxForm({ form: 'signUp', validate })
 )(SignUp);

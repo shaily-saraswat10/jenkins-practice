@@ -1,17 +1,20 @@
 import React from 'react';
-import { Provider } from 'react-redux';
-import { ThemeProvider } from '@material-ui/core/styles';
+
+import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
 import { ConnectedRouter } from 'connected-react-router';
-import theme from './Theme';
+import { Provider } from 'react-redux';
 import App from '../App/App';
+import theme from './Theme';
 
 const Root = ({ store, history }) => {
   return (
     <Provider store={store}>
       <ConnectedRouter history={history}>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+        </StyledEngineProvider>
       </ConnectedRouter>
     </Provider>
   );

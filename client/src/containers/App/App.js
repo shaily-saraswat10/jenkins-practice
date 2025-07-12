@@ -1,17 +1,19 @@
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+
 import { connect } from 'react-redux';
+import { Redirect, Route, Switch } from 'react-router-dom';
+
 import AnonymousRoute from '../../components/accessControl/AnonymousRoute';
 import ProtectedRoute from '../../components/accessControl/ProtectedRoute';
+import Dashboard from '../../layouts/Dashboard';
+import { tryLocalSignIn } from '../../store/actions';
+import { getIsSignedIn } from '../../store/selectors';
+import RequestPasswordReset from '../Auth/RequestPasswordReset';
+import RequestVerificationEmail from '../Auth/RequestVerificationEmail';
+import ResetPassword from '../Auth/ResetPassword';
 import SignIn from '../Auth/SignIn';
 import SignUp from '../Auth/SignUp';
 import VerifyEmail from '../Auth/VerifyEmail';
-import { tryLocalSignIn } from '../../store/actions';
-import RequestVerificationEmail from '../Auth/RequestVerificationEmail';
-import RequestPasswordReset from '../Auth/RequestPasswordReset';
-import ResetPassword from '../Auth/ResetPassword';
-import Dashboard from '../../layouts/Dashboard';
-import { getIsSignedIn } from '../../store/selectors';
 
 class App extends React.Component {
   componentDidMount() {

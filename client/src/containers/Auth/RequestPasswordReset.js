@@ -1,25 +1,27 @@
-import React from 'react';
-import { compose } from 'redux';
+import React, { useEffect } from 'react';
+
 import { connect } from 'react-redux';
-import { requestPasswordReset, unloadAuthPage } from '../../store/actions';
+
 import RequestTokenForm from '../../components/RequestTokenForm';
+import { requestPasswordReset, unloadAuthPage } from '../../store/actions';
 
-class RequestPasswordReset extends React.Component {
-  render() {
-    return (
-      <RequestTokenForm
-        tokenPurpose="reset-password"
-        title="Send Password Reset Email"
-        onSubmit={this.props.requestPasswordReset}
-      />
-    );
-  }
+const RequestPasswordReset = ({ requestPasswordReset, unloadAuthPage }) => {
+  useEffect(() => {
+    return () => {
+      unloadAuthPage();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  componentWillUnmount() {
-    this.props.unloadAuthPage();
-  }
-}
+  return (
+    <RequestTokenForm
+      tokenPurpose="reset-password"
+      title="Send Password Reset Email"
+      onSubmit={requestPasswordReset}
+    />
+  );
+};
 
-export default compose(connect(null, { requestPasswordReset, unloadAuthPage }))(
+export default connect(null, { requestPasswordReset, unloadAuthPage })(
   RequestPasswordReset
 );
