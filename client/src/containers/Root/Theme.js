@@ -1,6 +1,6 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles';
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: '#1d91b4',
@@ -9,15 +9,19 @@ const theme = createMuiTheme({
       main: '#e91e63',
     },
   },
-  overrides: {
+  components: {
     MuiDrawer: {
-      paper: {
-        backgroundColor: '#18202c',
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#18202c',
+        },
       },
     },
     MuiListItemIcon: {
-      root: {
-        color: 'inherit',
+      styleOverrides: {
+        root: {
+          color: 'inherit',
+        },
       },
     },
   },

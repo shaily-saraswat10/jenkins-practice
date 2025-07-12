@@ -1,23 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import { Tooltip } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import clsx from 'clsx';
-import Avatar from '@material-ui/core/Avatar';
-import Divider from '@material-ui/core/Divider';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import { Tooltip } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
 import { push } from 'connected-react-router';
 import { Tag } from 'mdi-material-ui';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { makeStyles } from 'tss-react/mui';
 
 import { getRouteCategories } from '../store/selectors';
 
-const styles = (theme) => ({
+const useStyles = makeStyles()((theme) => ({
   categoryHeader: {
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
@@ -67,10 +67,11 @@ const styles = (theme) => ({
     marginTop: theme.spacing(2),
     backgroundColor: '#404854',
   },
-});
+}));
 
 function Navigator(props) {
-  const { classes, pathname, routeCategories, onClose, push, ...other } = props;
+  const { pathname, routeCategories, onClose, push, ...other } = props;
+  const { classes } = useStyles();
   return (
     <Drawer variant="permanent" onClose={onClose} {...other}>
       <List disablePadding onClick={onClose}>
@@ -156,11 +157,4 @@ const mapStateToProps = (state) => ({
   routeCategories: getRouteCategories(state),
 });
 
-Navigator.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default compose(
-  connect(mapStateToProps, { push }),
-  withStyles(styles)
-)(Navigator);
+export default compose(connect(mapStateToProps, { push }))(Navigator);

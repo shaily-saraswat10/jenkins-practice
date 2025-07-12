@@ -1,49 +1,39 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import AppBar from '@material-ui/core/AppBar';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Slide from '@material-ui/core/Slide';
-import Toolbar from '@material-ui/core/Toolbar';
-import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import React, { useMemo, useState } from 'react';
+
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Slide from '@mui/material/Slide';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
 import { push } from 'connected-react-router';
 import {
   Account,
   Bell,
-  Logout,
   Github,
+  Logout,
   Menu as MenuIcon,
 } from 'mdi-material-ui';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { makeStyles } from 'tss-react/mui';
+
+import { signOut } from '../store/actions';
 import {
-  getIsSignedIn,
   getCurrentUser,
+  getIsSignedIn,
   getSignedInWith,
 } from '../store/selectors';
-import { signOut } from '../store/actions';
 
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-
-function ShowOnScroll({ children }) {
-  const trigger = useScrollTrigger({ threshold: 48, disableHysteresis: true });
-  return (
-    <Slide in={trigger} direction="up">
-      <span>{children}</span>
-    </Slide>
-  );
-}
-
-const styles = (theme) => ({
+const useStyles = makeStyles()((theme) => ({
   secondaryBar: {
     zIndex: 0,
   },
@@ -53,168 +43,162 @@ const styles = (theme) => ({
   },
   menuButton: {
     marginLeft: -theme.spacing(1),
+    color: theme.palette.common.white,
   },
   iconButtonAvatar: {
     padding: 4,
   },
-});
+}));
 
-class Header extends React.Component {
-  state = { anchorEl: null };
+const ShowOnScroll = ({ children }) => {
+  const trigger = useScrollTrigger({ threshold: 48, disableHysteresis: true });
+  return (
+    <Slide in={trigger} direction="up">
+      <span>{children}</span>
+    </Slide>
+  );
+};
 
-  onMenuOpen = (event) => {
-    this.setState({ anchorEl: event.currentTarget });
+const Header = ({
+  onDrawerToggle,
+  me,
+  authProvider,
+  signOut,
+  push,
+  routes,
+  pathname,
+}) => {
+  const { classes } = useStyles();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const onMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  onMenuClose = () => {
-    this.setState({ anchorEl: null });
+  const onMenuClose = () => {
+    setAnchorEl(null);
   };
 
-  onProfileClick = () => {
-    this.setState({ anchorEl: null });
-    this.props.push('/dashboard/profile');
+  const onProfileClick = () => {
+    setAnchorEl(null);
+    push('/dashboard/profile');
   };
 
-  getBrand = () => {
-    const { routes: routeCategories, pathname } = this.props;
+  const brand = useMemo(() => {
+    if (!routes) return '';
+
     let brand = '';
-    routeCategories.forEach(({ routes }) => {
-      routes.forEach(({ name, path }) => {
-        if (pathname.indexOf(path) > -1) {
+    routes?.forEach(({ routes }) => {
+      routes?.forEach(({ name, path }) => {
+        if (pathname?.indexOf(path) > -1) {
           brand = name;
         }
       });
     });
     return brand;
-  };
+  }, [routes, pathname]);
 
-  render() {
-    const { classes, onDrawerToggle, me, authProvider, signOut } = this.props;
-
-    const { anchorEl } = this.state;
-
-    return (
-      <React.Fragment>
-        <AppBar color="primary" position="sticky" elevation={0}>
-          <Toolbar variant="dense">
-            <Grid container spacing={1} alignItems="center">
-              <Hidden lgUp>
-                <Grid item>
-                  <IconButton
-                    color="inherit"
-                    aria-label="open drawer"
-                    onClick={onDrawerToggle}
-                    className={classes.menuButton}
-                  >
-                    <MenuIcon />
-                  </IconButton>
-                </Grid>
-              </Hidden>
-              <Grid item xs>
-                <ShowOnScroll>
-                  <Typography color="inherit" variant="h6">
-                    {this.getBrand()}
-                  </Typography>
-                </ShowOnScroll>
-              </Grid>
-              <Grid item>
-                <Tooltip title="Alerts • No alerts">
-                  <IconButton color="inherit">
-                    <Bell />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-              <Grid item>
-                <Tooltip title={`${me.firstName} ${me.lastName}`}>
-                  <IconButton
-                    color="inherit"
-                    className={classes.iconButtonAvatar}
-                    aria-controls="avatar-menu"
-                    aria-haspopup="true"
-                    onClick={this.onMenuOpen}
-                  >
-                    <Avatar
-                      src={me.provider[authProvider].picture}
-                      alt="My Avatar"
-                      className={classes.avatar}
-                    />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  id="avatar-menu"
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={this.onMenuClose}
-                  keepMounted
-                >
-                  <MenuItem onClick={this.onProfileClick}>
-                    <ListItemIcon>
-                      <Account />
-                    </ListItemIcon>
-                    <ListItemText primary="Profile" />
-                  </MenuItem>
-                  <MenuItem onClick={signOut}>
-                    <ListItemIcon>
-                      <Logout />
-                    </ListItemIcon>
-                    <ListItemText primary="Log out" />
-                  </MenuItem>
-                </Menu>
-              </Grid>
-            </Grid>
-          </Toolbar>
-        </AppBar>
-        <AppBar
-          component="div"
-          className={classes.secondaryBar}
-          color="primary"
-          position="static"
-          elevation={0}
-        >
-          <Toolbar variant="dense">
-            <Grid container alignItems="center" spacing={1}>
-              <Grid item xs>
-                <Typography color="inherit" variant="h6">
-                  {this.getBrand()}
-                </Typography>
-              </Grid>
-              <Grid item>
-                <Tooltip title="Demo on Expo">
-                  <Button
-                    className={classes.button}
-                    variant="outlined"
-                    color="inherit"
-                    size="small"
-                    target="_blank"
-                    href="https://expo.io/@t-ho/mern-stack"
-                  >
-                    Mobile
-                  </Button>
-                </Tooltip>
-              </Grid>
-              <Grid item>
-                <Tooltip title="Fork me on Github">
-                  <IconButton
-                    color="inherit"
-                    target="_blank"
-                    href="https://github.com/t-ho/mern-stack"
-                  >
-                    <Github />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-            </Grid>
-          </Toolbar>
-        </AppBar>
-      </React.Fragment>
-    );
-  }
-}
-
-Header.propTypes = {
-  classes: PropTypes.object.isRequired,
-  onDrawerToggle: PropTypes.func.isRequired,
-  routes: PropTypes.arrayOf(PropTypes.object),
+  return (
+    <React.Fragment>
+      <AppBar color="primary" position="sticky" elevation={0}>
+        <Toolbar variant="dense">
+          <Paper
+            elevation={0}
+            sx={{ display: { lg: 'none', xs: 'block' } }}
+            style={{ backgroundColor: 'transparent' }}
+          >
+            <IconButton
+              aria-label="open drawer"
+              onClick={onDrawerToggle}
+              className={classes.menuButton}
+              size="large"
+            >
+              <MenuIcon />
+            </IconButton>
+          </Paper>
+          <Typography sx={{ flexGrow: 1 }} color="inherit" variant="h6">
+            <ShowOnScroll>{brand}</ShowOnScroll>
+          </Typography>
+          <Tooltip title="Alerts • No alerts">
+            <IconButton color="inherit" size="large">
+              <Bell />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={`${me?.firstName || ''} ${me?.lastName || ''}`}>
+            <IconButton
+              color="inherit"
+              className={classes.iconButtonAvatar}
+              aria-controls="avatar-menu"
+              aria-haspopup="true"
+              onClick={onMenuOpen}
+              size="large"
+            >
+              <Avatar
+                src={me?.provider?.[authProvider]?.picture}
+                alt="My Avatar"
+                className={classes.avatar}
+              />
+            </IconButton>
+          </Tooltip>
+          <Menu
+            id="avatar-menu"
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={onMenuClose}
+            keepMounted
+          >
+            <MenuItem onClick={onProfileClick}>
+              <ListItemIcon>
+                <Account />
+              </ListItemIcon>
+              <ListItemText primary="Profile" />
+            </MenuItem>
+            <MenuItem onClick={signOut}>
+              <ListItemIcon>
+                <Logout />
+              </ListItemIcon>
+              <ListItemText primary="Log out" />
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <AppBar
+        component="div"
+        className={classes.secondaryBar}
+        color="primary"
+        position="static"
+        elevation={0}
+      >
+        <Toolbar variant="dense">
+          <Typography color="inherit" variant="h6" sx={{ flexGrow: 1 }}>
+            {brand}
+          </Typography>
+          <Tooltip title="Demo on Expo">
+            <Button
+              className={classes.button}
+              variant="outlined"
+              color="inherit"
+              size="small"
+              target="_blank"
+              href="https://expo.io/@t-ho/mern-stack"
+            >
+              Mobile
+            </Button>
+          </Tooltip>
+          <Tooltip title="Fork me on Github">
+            <IconButton
+              color="inherit"
+              target="_blank"
+              href="https://github.com/t-ho/mern-stack"
+              size="large"
+            >
+              <Github />
+            </IconButton>
+          </Tooltip>
+        </Toolbar>
+      </AppBar>
+    </React.Fragment>
+  );
 };
 
 const mapStateToProps = (state) => {
@@ -226,7 +210,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default compose(
-  connect(mapStateToProps, { signOut, push }),
-  withStyles(styles)
-)(Header);
+export default compose(connect(mapStateToProps, { signOut, push }))(Header);

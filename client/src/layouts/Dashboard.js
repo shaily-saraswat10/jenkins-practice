@@ -1,19 +1,20 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Hidden from '@material-ui/core/Hidden';
-import { withStyles } from '@material-ui/core/styles';
-import { Switch, Redirect, Route } from 'react-router-dom';
+
+import CssBaseline from '@mui/material/CssBaseline';
+import Paper from '@mui/material/Paper';
 import { connect } from 'react-redux';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { compose } from 'redux';
-import Navigator from '../components/Navigator';
+import { makeStyles } from 'tss-react/mui';
+
 import Header from '../components/Header';
+import Navigator from '../components/Navigator';
 import ProtectedRoute from '../components/accessControl/ProtectedRoute';
 import { getRouteCategories } from '../store/selectors';
 
 const drawerWidth = 256;
 
-const styles = (theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     display: 'flex',
   },
@@ -32,7 +33,7 @@ const styles = (theme) => ({
     flex: 1,
     padding: theme.spacing(2),
   },
-});
+}));
 
 class Dashboard extends React.Component {
   state = { mobileOpen: false };
@@ -69,24 +70,24 @@ class Dashboard extends React.Component {
   );
 
   render() {
-    const { classes, routeCategories } = this.props;
+    const { routeCategories, classes } = this.props;
     const { mobileOpen } = this.state;
 
     return (
       <div className={classes.root}>
         <CssBaseline />
         <nav className={classes.drawer}>
-          <Hidden lgUp implementation="js">
+          <Paper sx={{ display: { lg: 'none', xs: 'block' } }}>
             <Navigator
               PaperProps={{ style: { width: drawerWidth } }}
               variant="temporary"
               open={mobileOpen}
               onClose={this.handleDrawerToggle}
             />
-          </Hidden>
-          <Hidden mdDown implementation="css">
+          </Paper>
+          <Paper sx={{ display: { xs: 'none', lg: 'block' } }}>
             <Navigator PaperProps={{ style: { width: drawerWidth } }} />
-          </Hidden>
+          </Paper>
         </nav>
         <div className={classes.app}>
           <Header
@@ -106,11 +107,9 @@ const mapStateToProps = (state) => ({
   routeCategories: getRouteCategories(state),
 });
 
-Dashboard.propTypes = {
-  classes: PropTypes.object.isRequired,
+const StyledDashboard = (props) => {
+  const { classes } = useStyles();
+  return <Dashboard {...props} classes={classes} />;
 };
 
-export default compose(
-  connect(mapStateToProps, {}),
-  withStyles(styles)
-)(Dashboard);
+export default compose(connect(mapStateToProps, {}))(StyledDashboard);

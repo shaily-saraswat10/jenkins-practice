@@ -1,32 +1,34 @@
 import React from 'react';
-import Alert from '@material-ui/lab/Alert';
-import Avatar from '@material-ui/core/Avatar';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
-import Link from '@material-ui/core/Link';
-import Snackbar from '@material-ui/core/Snackbar';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+
+import Alert from '@mui/material/Alert';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Snackbar from '@mui/material/Snackbar';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Facebook, Google } from 'mdi-material-ui';
-import GoogleLogin from 'react-google-login';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { Field, reduxForm, SubmissionError } from 'redux-form';
+import GoogleLogin from 'react-google-login';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { Field, reduxForm, SubmissionError } from 'redux-form';
+import { makeStyles } from 'tss-react/mui';
+
 import {
-  signIn,
   facebookSignIn,
   googleSignIn,
+  signIn,
   unloadAuthPage,
 } from '../../store/actions';
-import { getProcessing, getError } from '../../store/selectors';
+import { getError, getProcessing } from '../../store/selectors';
 import { email, minLength, required } from '../../utils/formValidator';
 
-const styles = (theme) => ({
+const useStyles = makeStyles()((theme) => ({
   paper: {
     display: 'flex',
     flexDirection: 'column',
@@ -45,7 +47,7 @@ const styles = (theme) => ({
   submit: {
     margin: theme.spacing(4, 0, 2),
   },
-});
+}));
 
 class SignIn extends React.Component {
   onSubmit = (formValues) => {
@@ -99,14 +101,8 @@ class SignIn extends React.Component {
   );
 
   render() {
-    const {
-      classes,
-      handleSubmit,
-      pristine,
-      submitting,
-      valid,
-      error,
-    } = this.props;
+    const { handleSubmit, pristine, submitting, valid, error, classes } =
+      this.props;
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -121,7 +117,7 @@ class SignIn extends React.Component {
           </Typography>
           <form className={classes.form} onSubmit={handleSubmit(this.onSubmit)}>
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Field
                   id="email"
                   label="Email Address"
@@ -130,7 +126,7 @@ class SignIn extends React.Component {
                   component={this.renderTextField}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Field
                   name="password"
                   label="Password"
@@ -152,12 +148,12 @@ class SignIn extends React.Component {
               Submit
             </Button>
             <Grid container>
-              <Grid item xs>
+              <Grid size="grow">
                 <Link href="/request-password-reset" variant="body2">
                   Forgot password?
                 </Link>
               </Grid>
-              <Grid item>
+              <Grid>
                 <Link href="/signup" variant="body2">
                   {"Don't have an account? Sign up"}
                 </Link>
@@ -170,7 +166,7 @@ class SignIn extends React.Component {
             </Typography>
           </Box>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <FacebookLogin
                 appId={process.env.REACT_APP_FACEBOOK_APP_ID}
                 fields="name,email,picture"
@@ -191,7 +187,7 @@ class SignIn extends React.Component {
                 )}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <GoogleLogin
                 clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
                 buttonText="Google Login"
@@ -247,6 +243,11 @@ const validate = (values) => {
   return errors;
 };
 
+const StyledSignIn = (props) => {
+  const { classes } = useStyles();
+  return <SignIn {...props} classes={classes} />;
+};
+
 export default compose(
   connect(maptStateToProps, {
     signIn,
@@ -254,6 +255,5 @@ export default compose(
     googleSignIn,
     unloadAuthPage,
   }),
-  reduxForm({ form: 'signIn', validate }),
-  withStyles(styles)
-)(SignIn);
+  reduxForm({ form: 'signIn', validate })
+)(StyledSignIn);
