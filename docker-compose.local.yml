@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mongo: # Remove this if you use external MongoDB service such as MongoDB Atlas
     restart: always
