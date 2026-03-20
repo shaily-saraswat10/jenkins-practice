@@ -2,5 +2,5 @@ FROM node:lts-buster
 WORKDIR /mern-stack/server
 COPY ./server/package*.json ./
 RUN npm install
-COPY ./.env ../.env
+EXPOSE 3000
 CMD ["npm", "run", "start"]
